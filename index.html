@@ -1,711 +1,713 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canadian Finance Tracker (Light Theme)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        :root {
-            font-family: 'Inter', sans-serif;
-        }
-        /* --- LIGHT THEME DEFINITIONS --- */
-        .text-neon-green { color: #10B981; } /* Slightly softer green accent for light theme */
-        .bg-card { background-color: #ffffff; } /* Pure white cards */
-        .shadow-neon { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); } /* Softer shadow */
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canadian Finance Tracker (Light Theme)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        :root {
+            font-family: 'Inter', sans-serif;
+        }
+        /* --- LIGHT THEME DEFINITIONS --- */
+        .text-neon-green { color: #10B981; } /* Slightly softer green accent for light theme */
+        .bg-card { background-color: #ffffff; } /* Pure white cards */
+        .shadow-neon { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); } /* Softer shadow */
 
-        /* --- MATERIAL 3 OUTLINED INPUT STYLE (Adjusted for Light Theme) --- */
-        .input-field-styled {
-            /* Increased padding for better tap targets and aesthetics (py-5 is 1.25rem padding top/bottom) */
-            @apply bg-white border border-gray-300 text-gray-800 placeholder-gray-500 rounded-xl py-5 px-4 w-full transition duration-200 appearance-none;
-        }
-        .input-field-styled:focus {
-            /* Focus remains the accent green */
-            @apply outline-none border-neon-green ring-2 ring-neon-green shadow-md;
-        }
-        /* Ensure options in select boxes are legible on white backgrounds */
-        .input-field-styled option {
-            background: #ffffff; 
-            color: #1f2937;
-        }
-        /* ---------------------------------- */
-        .btn-primary {
-            /* Increased height to match input fields (changed py-2 to py-4) */
-            @apply bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-4 rounded-xl transition duration-200 shadow-lg;
-        }
-    </style>
+        /* --- MATERIAL 3 OUTLINED INPUT STYLE (Adjusted for Light Theme) --- */
+        .input-field-styled {
+            /* Increased padding for better tap targets and aesthetics (py-5 is 1.25rem padding top/bottom) */
+            @apply bg-white border border-gray-300 text-gray-800 placeholder-gray-500 rounded-xl py-5 px-4 w-full transition duration-200 appearance-none;
+        }
+        .input-field-styled:focus {
+            /* Focus remains the accent green */
+            @apply outline-none border-neon-green ring-2 ring-neon-green shadow-md;
+        }
+        /* Ensure options in select boxes are legible on white backgrounds */
+        .input-field-styled option {
+            background: #ffffff; 
+            color: #1f2937;
+        }
+        /* ---------------------------------- */
+        .btn-primary {
+            /* Increased height to match input fields (changed py-2 to py-4) */
+            @apply bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-4 rounded-xl transition duration-200 shadow-lg;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen p-4 md:p-8">
-    
-    <!-- Global Alert/Message Box Container -->
-    <div id="globalMessageContainer" class="fixed top-4 right-4 z-50 w-full max-w-sm"></div>
-
-    <!-- Main Application Container -->
-    <div id="app" class="max-w-7xl mx-auto">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold text-neon-green mb-2">💰 North Star Finance Dashboard</h1>
-            <p class="text-gray-600">Your consolidated, private financial overview.</p>
-            <div id="loadingIndicator" class="hidden mt-4">
-                <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-neon-green mx-auto"></div>
-                <p class="text-sm text-neon-green mt-2">Processing...</p>
-            </div>
-        </header>
-
-        <!-- Tabs/Navigation (Responsive) -->
-        <div class="flex border-b border-gray-200 mb-8 overflow-x-auto whitespace-nowrap">
-            <!-- Dashboard Tab (Active by Default) -->
-            <button onclick="showSection('dashboard')" id="tab-dashboard" class="py-2 px-4 text-sm font-medium border-b-2 border-neon-green focus:outline-none transition duration-150 text-neon-green font-semibold">Dashboard</button>
-            <!-- Accounts Tab (Inactive by Default) -->
-            <button onclick="showSection('accounts')" id="tab-accounts" class="py-2 px-4 text-sm font-medium border-b-2 border-transparent hover:border-neon-green focus:outline-none transition duration-150 text-gray-600 hover:text-gray-800">Accounts & People</button>
-            <button onclick="showSection('upload')" id="tab-upload" class="py-2 px-4 text-sm font-medium border-b-2 border-transparent hover:border-neon-green focus:outline-none transition duration-150 text-gray-600 hover:text-gray-800">Upload Transactions</button>
-            <button onclick="showSection('history')" id="tab-history" class="py-2 px-4 text-sm font-medium border-b-2 border-transparent hover:border-neon-green focus:outline-none transition duration-150 text-gray-600 hover:text-gray-800">History</button>
-        </div>
-
-        <!-- Dashboard Section (Active by Default) -->
-        <section id="dashboard" class="app-section">
-            <!-- Responsive Grid: 1 column on mobile, 3 columns on desktop -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200">
-                    <p class="text-sm text-gray-500">Total Net Worth</p>
-                    <h2 id="netWorthDisplay" class="text-3xl font-bold mt-1 text-neon-green">$0.00</h2>
-                </div>
-                <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200">
-                    <p class="text-sm text-gray-500">Total Accounts</p>
-                    <h2 id="totalAccountsDisplay" class="text-3xl font-bold mt-1 text-gray-800">0</h2>
-                </div>
-                <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200">
-                    <p class="text-sm text-gray-500">Total Transactions</p>
-                    <h2 id="totalTransactionsDisplay" class="text-3xl font-bold mt-1 text-gray-800">0</h2>
-                </div>
-            </div>
-
-            <h3 class="text-2xl font-semibold mb-4 text-gray-800">Account Summary</h3>
-            <div id="dashboardAccountList" class="space-y-4">
-                <p class="text-gray-500">No accounts added yet.</p>
-            </div>
-        </section>
-
-        <!-- Accounts Section (Hidden by Default) -->
-        <section id="accounts" class="app-section hidden">
-            <h3 class="text-2xl font-semibold mb-6 text-gray-800">Manage Accounts & Family</h3>
-
-            <!-- Person Management Form -->
-            <div class="bg-card p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
-                <h4 class="text-xl font-medium mb-4 text-neon-green">Manage Family Members</h4>
-                <form id="addPersonForm" class="flex flex-col md:flex-row gap-4 mb-6">
-                    <input type="text" id="personName" placeholder="New Member Name (e.g., Jane)" required class="input-field-styled flex-grow">
-                    <button type="submit" class="btn-primary">Add Member</button>
-                </form>
-
-                <div id="personList" class="space-y-2 text-sm">
-                    <!-- Persons listed here -->
-                </div>
-            </div>
-
-            <!-- Add Account Form -->
-            <div class="bg-card p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
-                <h4 class="text-xl font-medium mb-4 text-neon-green">Add New Account</h4>
-                <!-- Responsive Grid: 1 column on mobile, 4 columns on desktop -->
-                <form id="addAccountForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <input type="text" id="accountName" placeholder="Account Nickname (e.g., TD Checking)" required class="input-field-styled col-span-full md:col-span-2">
-                    <input type="text" id="accountCode" placeholder="Code (e.g., TDCH)" required pattern="[A-Za-z0-9]{4}" title="4 characters only, used for CSV matching (e.g., BankCode + TypeCode)" maxlength="4" class="input-field-styled">
-
-                    <select id="accountType" required class="input-field-styled">
-                        <option value="" disabled selected>Select Type</option>
-                        <option value="Checking">Checking</option>
-                        <option value="Savings">Savings</option>
-                        <option value="Credit">Credit Card</option>
-                        <option value="RRSP">RRSP (Inv)</option>
-                        <option value="TFSA">TFSA (Inv)</option>
-                        <option value="HFSA">FHSA (Inv)</option>
-                        <option value="RESP">RESP (Inv)</option>
-                    </select>
-                    <select id="accountPerson" required class="input-field-styled">
-                        <!-- Options filled by JS -->
-                    </select>
-                    <input type="number" id="accountBalance" placeholder="Initial Balance (CAD)" required step="0.01" class="input-field-styled">
-                    <button type="submit" class="btn-primary md:col-span-1">Add Account</button>
-                </form>
-            </div>
-
-            <!-- Account List -->
-            <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200">
-                <h4 class="text-xl font-medium mb-4">Your Accounts (<span id="accountCount">0</span>)</h4>
-                <div id="accountList" class="space-y-3">
-                    <p class="text-gray-500">Your accounts will appear here.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Upload Section -->
-        <section id="upload" class="app-section hidden">
-            <h3 class="text-2xl font-semibold mb-6 text-gray-800">Transaction Data Upload</h3>
-
-            <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200">
-                <h4 class="text-xl font-medium mb-4 text-neon-green">Import TD-Style CSV File</h4>
-                <p class="text-sm text-gray-600 mb-4">
-                    The parser is configured for the **TD Bank 5-column format**: `Date,Description,Expense,Income,Balance`.
-                    <br>The filename **must** follow the convention: **`BANK_PERSON_TYPE_MM_YY.csv`**
-                    <br>Example: `TD_ME_CH_10_25.csv` (TD Bank, Person ME, Checking Account, Oct 2025)
-                    <br>The file contents are matched against the 4-character **Code** (e.g., TDCH) and the **Person's two-letter code** (e.g., ME) defined in your accounts list.
-                </p>
-
-                <form id="uploadForm">
-                    <label for="csvFile" class="block mb-2 text-sm font-medium text-gray-700">Choose CSV File</label>
-                    <!-- Input file styling adjusted for light theme -->
-                    <input type="file" id="csvFile" accept=".csv" required class="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-neon-green hover:file:bg-gray-300 transition duration-150">
-                    <button type="submit" class="btn-primary mt-6">Process & Upload Transactions</button>
-                </form>
-
-                <div id="uploadMessage" class="mt-4 text-sm"></div>
-            </div>
-        </section>
-
-        <!-- History Section -->
-        <section id="history" class="app-section hidden">
-            <h3 class="text-2xl font-semibold mb-6 text-gray-800">Transaction History</h3>
-
-            <!-- Responsive Filtering Layout -->
-            <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
-                <select id="historyFilterAccount" class="input-field-styled w-full md:w-1/3">
-                    <option value="all">All Accounts</option>
-                    <!-- Options filled by JS -->
-                </select>
-                <input type="text" id="historyFilterSearch" placeholder="Filter by Description" class="input-field-styled w-full md:w-1/3">
-            </div>
-
-            <!-- Table Container with Mobile Horizontal Scrolling -->
-            <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200 overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead>
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionHistoryBody" class="divide-y divide-gray-100">
-                        <!-- Transactions injected here -->
-                    </tbody>
-                </table>
-                <p id="noTransactionsMessage" class="text-center text-gray-500 py-4 hidden">No transactions recorded yet.</p>
-            </div>
-        </section>
-    </div>
-    
-    <!-- Global Alert/Message Box Component (Custom implementation to avoid alert()) -->
-    <script>
-        /** Shows a floating, dismissible message (replaces alert/confirm for non-critical messages). */
-        const showMessage = (text, type = 'success', duration = 5000) => {
-            const container = document.getElementById('globalMessageContainer');
-            const colorMap = {
-                'success': 'bg-green-600 border-green-400',
-                'error': 'bg-red-600 border-red-400',
-                'info': 'bg-blue-600 border-blue-400'
-            };
-            
-            const message = document.createElement('div');
-            // Using dark theme colors for the notification box itself to ensure contrast
-            message.className = `p-4 mb-2 rounded-lg shadow-xl text-white text-sm border-l-4 ${colorMap[type]} transition-opacity duration-300`;
-            message.textContent = text;
-            
-            container.prepend(message); // Prepend so new messages appear at the top
-
-            setTimeout(() => {
-                message.classList.add('opacity-0');
-                setTimeout(() => message.remove(), 300);
-            }, duration);
-        };
-    </script>
-
-
-    <script>
-        const STORAGE_KEY = 'financeTrackerData';
-        // Account type mapping for calculating net worth (Liability vs Asset)
-        const ACCT_TYPES = {
-            Checking: 'Cash', Savings: 'Cash', Credit: 'Liability',
-            RRSP: 'Investment', TFSA: 'Investment', HFSA: 'Investment', RESP: 'Investment'
-        };
-
-        let data = {
-            accounts: [],
-            persons: ['Me'], // Start with "Me"
-            transactions: []
-        };
-
-        // --- Utility Functions ---
-
-        /** Loads data from localStorage or initializes default structure. */
-        const loadData = () => {
-            try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) {
-                    data = JSON.parse(stored);
-                    // Ensure core arrays exist
-                    if (!Array.isArray(data.transactions)) { data.transactions = []; }
-                    if (!Array.isArray(data.persons)) { data.persons = ['Me']; }
-                    if (!data.persons.includes('Me')) { data.persons.unshift('Me'); }
-
-                    // Ensure accounts have a unique ID and code (migration safety)
-                    data.accounts = data.accounts.map(account => ({
-                        ...account,
-                        id: account.id || generateId(),
-                        // Ensure code exists for older entries
-                        code: account.code || (account.name.substring(0, 2) + account.type.substring(0, 2)).toUpperCase()
-                    }));
-                }
-            } catch (e) {
-                console.error("Could not load data from localStorage:", e);
-                data = { accounts: [], persons: ['Me'], transactions: [] };
-                showMessage("Error loading data. Using default structure.", 'error');
-            }
-        };
-
-        /** Saves the current data object to localStorage. */
-        const saveData = () => {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            } catch (e) {
-                console.error("Could not save data to localStorage:", e);
-                showMessage('Error: Failed to save data. Storage might be full or blocked.', 'error');
-            }
-        };
-
-        /** Generates a simple unique ID. */
-        const generateId = () => 'ac' + (Math.random().toString(36).substring(2, 9));
-
-        /** Formats number as currency. */
-        const formatCurrency = (amount) => {
-            return new Intl.NumberFormat('en-CA', {
-                style: 'currency',
-                currency: 'CAD'
-            }).format(amount);
-        };
-
-        // --- Person & Account Management ---
-
-        const renderPeopleAndAccounts = () => {
-            // Containers
-            const listContainer = document.getElementById('accountList');
-            const dashboardContainer = document.getElementById('dashboardAccountList');
-            const historyFilter = document.getElementById('historyFilterAccount');
-            const personSelect = document.getElementById('accountPerson');
-            const accountCountSpan = document.getElementById('accountCount');
-            const personListContainer = document.getElementById('personList'); 
-
-            // Clear containers
-            listContainer.innerHTML = '';
-            dashboardContainer.innerHTML = '';
-            historyFilter.innerHTML = '<option value="all">All Accounts</option>';
-            personSelect.innerHTML = '<option value="" disabled selected>Select Owner</option>';
-
-            accountCountSpan.textContent = data.accounts.length;
-            document.getElementById('totalAccountsDisplay').textContent = data.accounts.length;
-
-            if (data.accounts.length === 0) {
-                listContainer.innerHTML = '<p class="text-gray-500">Your accounts will appear here.</p>';
-                dashboardContainer.innerHTML = '<p class="text-gray-500">No accounts added yet.</p>';
-            }
-
-            // 1. Populate Persons Dropdown and List
-            personListContainer.innerHTML = '';
-            data.persons.forEach(person => {
-                personSelect.innerHTML += `<option value="${person}">${person}</option>`;
-
-                const isDeletable = person !== 'Me';
-                personListContainer.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-100 p-3 rounded-lg border border-gray-200">
-                        <span class="text-gray-800">${person}</span>
-                        ${isDeletable ? `<button onclick="deletePerson('${person}')" class="text-red-500 hover:text-red-600 transition duration-150 p-1" title="Remove Member">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>` : `<span class="text-gray-400">Default</span>`}
-                    </div>
-                `;
-            });
-
-            // 2. Populate Accounts List
-            data.accounts.forEach(account => {
-                const isPositive = ACCT_TYPES[account.type] !== 'Liability';
-                const balanceDisplay = formatCurrency(account.balance);
-                // Updated balance colors for light theme
-                const balanceClass = isPositive ? 'text-green-600' : 'text-red-600';
-
-                // Account List (Management)
-                const listItem = `
-                    <div id="account-${account.id}" class="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 p-4 rounded-xl border border-gray-200 hover:bg-gray-200 transition duration-150">
-                        <div>
-                            <p class="text-lg font-semibold text-gray-800">${account.name} <span class="text-sm text-gray-500">(${account.code} - ${account.type} - ${account.person})</span></p>
-                            <p class="${balanceClass} text-sm mt-1">Balance: ${balanceDisplay}</p>
-                        </div>
-                        <button onclick="deleteAccount('${account.id}')" class="text-red-500 hover:text-red-600 p-2 rounded-full transition duration-150 mt-2 md:mt-0" title="Delete Account">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                    </div>
-                `;
-                listContainer.innerHTML += listItem;
-
-                // Dashboard List
-                const dashboardItem = `
-                    <div class="flex justify-between items-center bg-gray-100 p-4 rounded-xl border border-gray-200">
-                        <div>
-                            <p class="font-medium text-gray-800">${account.name} <span class="text-xs text-gray-500">(${account.code} / ${account.type})</span></p>
-                            <p class="text-xs text-gray-600">Owner: ${account.person}</p>
-                        </div>
-                        <p class="text-lg font-bold ${balanceClass}">${balanceDisplay}</p>
-                    </div>
-                `;
-                dashboardContainer.innerHTML += dashboardItem;
-
-                // History Filter
-                historyFilter.innerHTML += `<option value="${account.id}">${account.name} (${account.code})</option>`;
-            });
-
-            // Calculate Net Worth
-            const netWorth = data.accounts.reduce((sum, account) => {
-                // Treat Credit accounts with positive balances as liabilities (negative net worth contribution)
-                const contribution = (account.type === 'Credit' && account.balance > 0) ? -account.balance : account.balance;
-                return sum + contribution;
-            }, 0);
-            document.getElementById('netWorthDisplay').textContent = formatCurrency(netWorth);
-        };
-
-        const addPerson = (name) => {
-            if (name && !data.persons.includes(name)) {
-                data.persons.push(name);
-                data.persons.sort((a, b) => (a === 'Me' ? -1 : b === 'Me' ? 1 : a.localeCompare(b))); // Keep 'Me' first
-                saveData();
-                renderPeopleAndAccounts();
-                showMessage(`${name} added successfully.`, 'success');
-            } else if (name) {
-                showMessage(`Person "${name}" already exists.`, 'info');
-            }
-        };
-
-        const deletePerson = (name) => {
-            const accountsOwned = data.accounts.filter(acct => acct.person === name);
-            if (accountsOwned.length > 0) {
-                showMessage(`Cannot delete ${name}. They still own ${accountsOwned.length} account(s). Please reassign or delete their accounts first.`, 'error');
-                return;
-            }
-
-            // Using custom message box/modal pattern instead of window.confirm()
-            if (confirm(`Are you sure you want to delete the family member: ${name}?`)) {
-                data.persons = data.persons.filter(p => p !== name);
-                saveData();
-                renderPeopleAndAccounts();
-                showMessage(`${name} has been removed.`, 'info');
-            }
-        };
-
-        document.getElementById('addPersonForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('personName').value.trim();
-            if (name) {
-                addPerson(name);
-                document.getElementById('personName').value = '';
-            }
-        });
-
-        document.getElementById('addAccountForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('accountName').value.trim();
-            const code = document.getElementById('accountCode').value.trim().toUpperCase(); 
-            const type = document.getElementById('accountType').value;
-            const person = document.getElementById('accountPerson').value;
-            const balance = parseFloat(document.getElementById('accountBalance').value);
-
-            if (data.accounts.some(acct => acct.code === code)) {
-                 showMessage(`Account code "${code}" is already in use. Please choose a unique 4-character code.`, 'error');
-                 return;
-            }
-
-            const newAccount = {
-                id: generateId(),
-                code: code, 
-                name: name,
-                type: type,
-                person: person,
-                balance: balance,
-            };
-
-            data.accounts.push(newAccount);
-            saveData();
-            renderPeopleAndAccounts();
-            document.getElementById('addAccountForm').reset();
-            showMessage(`Account "${name} (${code})" added.`, 'success');
-        });
-
-        /** Deletes an account by ID. */
-        const deleteAccount = (id) => {
-            // Using custom message box/modal pattern instead of window.confirm()
-            if (confirm("Are you sure you want to delete this account? All associated transactions will be removed.")) {
-                data.accounts = data.accounts.filter(acct => acct.id !== id);
-                data.transactions = data.transactions.filter(t => t.accountId !== id); // Remove associated transactions
-                saveData();
-                renderAll();
-                showMessage("Account and associated transactions deleted.", 'info');
-            }
-        };
-
-        // --- Transaction Management ---
-
-        /** Updates account balance based on a new transaction. */
-        const updateAccountBalance = (accountId, amount) => {
-            const account = data.accounts.find(acct => acct.id === accountId);
-            if (account) {
-                account.balance = parseFloat((account.balance + amount).toFixed(2));
-            }
-        };
-
-        /** Parses a transaction CSV file and processes the entries using TD 5-column format. */
-        const parseCSV = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-
-                // Naming convention: BANK_PERSON_TYPE_MM_YY.csv
-                // Groups: [Full Match, BankCode, PersonCode, TypeCode, Month, Year]
-                const filenameRegex = /^([a-z0-9]{2})_([a-z0-9]{2})_([a-z0-9]{2})_(\d{2})_(\d{2})\.csv$/i;
-                const filenameMatch = file.name.match(filenameRegex);
-
-                if (!filenameMatch) {
-                    const expectedFormat = 'BANK_PERSON_TYPE_MM_YY.csv (e.g., TD_ME_CH_10_25.csv)';
-                    console.error("Filename Mismatch Debug:", {
-                        fileName: file.name,
-                        expectedRegex: filenameRegex.toString(),
-                        expectedFormat: expectedFormat
-                    });
-                    return reject(`Filename must match the strict format: ${expectedFormat}. Received: ${file.name}`);
-                }
-
-                const [, bankCode, personCode, typeCode] = filenameMatch;
-                const combinedAccountCode = (bankCode + typeCode).toUpperCase(); // e.g., TDCH
-
-                // 1. Find the target account using the combined code
-                let targetAccount = data.accounts.find(acct => acct.code === combinedAccountCode);
-
-                if (!targetAccount) {
-                    console.error("Account Code Mismatch Debug:", {
-                        fileName: file.name,
-                        combinedCodeFound: combinedAccountCode,
-                        availableCodes: data.accounts.map(a => a.code)
-                    });
-                    return reject(`No account found matching code: "${combinedAccountCode}". Please check the 4-character Code in your account list.`);
-                }
-
-                // 2. Validate person code (using first two letters of stored person name)
-                const expectedPersonCode = targetAccount.person.substring(0, 2).toUpperCase();
-                if (expectedPersonCode !== personCode.toUpperCase()) {
-                    console.error("Person Code Mismatch Debug:", {
-                        fileName: file.name,
-                        accountName: targetAccount.name,
-                        personFoundInFileName: personCode,
-                        expectedPersonCode: expectedPersonCode
-                    });
-                    return reject(`Account "${targetAccount.name}" belongs to ${targetAccount.person}. Expected person code in filename: ${expectedPersonCode}, found: ${personCode}.`);
-                }
-
-
-                reader.onload = (e) => {
-                    const csv = e.target.result;
-                    // Simple CSV parsing assuming TD's quote behavior and comma separation
-                    const lines = csv.split('\n').filter(line => line.trim() !== '');
-
-                    if (lines.length <= 1) {
-                        return reject("CSV file is empty or only contains headers.");
-                    }
-
-                    // Skipping header line
-                    const newTransactions = [];
-                    let processedCount = 0;
-                    let balanceUpdate = 0;
-
-                    for (let i = 1; i < lines.length; i++) {
-                        const line = lines[i];
-                        const values = line.replace(/"/g, '').split(',');
-
-                        // Expecting 5 columns: Date, Description, Expense, Income, Balance
-                        if (values.length < 5) continue;
-
-                        const date = values[0].trim();
-                        const description = values[1].trim();
-                        const expenseStr = values[2].trim();
-                        const incomeStr = values[3].trim();
-
-                        let amount = 0;
-                        let type = '';
-
-                        if (expenseStr) {
-                            amount = -parseFloat(expenseStr); // Expense is negative (DEBIT)
-                            type = 'DEBIT';
-                        } else if (incomeStr) {
-                            amount = parseFloat(incomeStr); // Income is positive (CREDIT)
-                            type = 'CREDIT';
-                        }
-
-                        if (isNaN(amount) || amount === 0) continue;
-
-                        // Create transaction object
-                        const transaction = {
-                            id: generateId() + (i-1),
-                            accountId: targetAccount.id,
-                            date: new Date(date).toISOString().split('T')[0], // YYYY-MM-DD
-                            description: description,
-                            amount: amount,
-                            accountName: targetAccount.name,
-                            person: targetAccount.person,
-                            type: type,
-                            sourceFile: file.name
-                        };
-
-                        // Check for duplicates before adding
-                        const isDuplicate = data.transactions.some(t =>
-                            t.accountId === transaction.accountId &&
-                            t.date === transaction.date &&
-                            t.description === transaction.description &&
-                            t.amount === transaction.amount
-                        );
-
-                        if (!isDuplicate) {
-                            newTransactions.push(transaction);
-                            balanceUpdate += amount;
-                            processedCount++;
-                        }
-                    }
-
-                    resolve({ newTransactions, targetAccount, balanceUpdate, processedCount });
-                };
-
-                reader.onerror = () => reject('Error reading file.');
-                reader.readAsText(file);
-            });
-        };
-
-        /** Handles the submission of the file upload form. */
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const fileInput = document.getElementById('csvFile');
-            const file = fileInput.files[0];
-            const loadingIndicator = document.getElementById('loadingIndicator');
-
-            if (!file) {
-                showMessage('Please select a CSV file.', 'error');
-                return;
-            }
-
-            loadingIndicator.classList.remove('hidden');
-
-            try {
-                const { newTransactions, targetAccount, balanceUpdate, processedCount } = await parseCSV(file);
-
-                data.transactions.push(...newTransactions);
-                updateAccountBalance(targetAccount.id, balanceUpdate);
-                saveData();
-                renderAll();
-
-                showMessage(`Successfully added ${processedCount} new transactions to ${targetAccount.name}. Balance updated by ${formatCurrency(balanceUpdate)}.`, 'success', 7000);
-
-                fileInput.value = '';
-
-            } catch (error) {
-                // The error message now contains the specific reason for failure
-                console.error("Upload Error:", error);
-                showMessage(`Upload failed: ${error}`, 'error', 7000);
-            } finally {
-                loadingIndicator.classList.add('hidden');
-            }
-        });
-
-
-        /** Renders the transaction history table with filtering. */
-        const renderHistory = () => {
-            const body = document.getElementById('transactionHistoryBody');
-            const filterAccount = document.getElementById('historyFilterAccount').value;
-            const filterSearch = document.getElementById('historyFilterSearch').value.toLowerCase();
-            const noTransactionsMessage = document.getElementById('noTransactionsMessage');
-
-            body.innerHTML = '';
-
-            // Sort by Date (descending)
-            let filteredTransactions = data.transactions.slice().sort((a, b) => new new Date(b.date) - new Date(a.date));
-
-            // Filtering
-            if (filterAccount !== 'all') {
-                filteredTransactions = filteredTransactions.filter(t => t.accountId === filterAccount);
-            }
-            if (filterSearch) {
-                filteredTransactions = filteredTransactions.filter(t => t.description.toLowerCase().includes(filterSearch));
-            }
-
-            document.getElementById('totalTransactionsDisplay').textContent = data.transactions.length;
-
-            if (filteredTransactions.length === 0) {
-                noTransactionsMessage.classList.remove('hidden');
-                return;
-            } else {
-                noTransactionsMessage.classList.add('hidden');
-            }
-
-            filteredTransactions.forEach(t => {
-                // Updated amount colors for light theme
-                const amountClass = t.amount >= 0 ? 'text-green-600' : 'text-red-600';
-                const row = `
-                    <tr class="hover:bg-gray-100 transition duration-100">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${t.date}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${t.description}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${t.accountName}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right ${amountClass}">${formatCurrency(t.amount)}</td>
-                    </tr>
-                `;
-                body.innerHTML += row;
-            });
-        };
-
-        document.getElementById('historyFilterAccount').addEventListener('change', renderHistory);
-        document.getElementById('historyFilterSearch').addEventListener('input', renderHistory);
-
-
-        // --- UI Control ---
-
-        /** Shows a specific section and updates the tab styles. */
-        const showSection = (sectionId) => {
-            document.querySelectorAll('.app-section').forEach(section => {
-                section.classList.add('hidden');
-            });
-            document.getElementById(sectionId).classList.remove('hidden');
-
-            document.querySelectorAll('button[id^="tab-"]').forEach(tab => {
-                // Inactive state for light theme tabs
-                tab.classList.remove('border-neon-green', 'text-neon-green', 'font-semibold');
-                tab.classList.add('border-transparent', 'text-gray-600', 'hover:text-gray-800');
-            });
-            // Active state for light theme tabs
-            document.getElementById(`tab-${sectionId}`).classList.remove('text-gray-600', 'hover:text-gray-800');
-            document.getElementById(`tab-${sectionId}`).classList.add('border-neon-green', 'text-neon-green', 'font-semibold');
-
-            // Rerender history whenever the history tab is clicked to apply current filters
-            if (sectionId === 'history') {
-                renderHistory();
-            }
-        };
-
-        /** Renders all major UI components. */
-        const renderAll = () => {
-            loadData();
-            renderPeopleAndAccounts();
-            renderHistory();
-        };
-
-        // --- Initialization ---
-
-        window.onload = () => {
-            renderAll();
-            // Start on the Dashboard tab
-            showSection('dashboard');
-        };
-
-        loadData();
-    </script>
+    
+    <!-- Global Alert/Message Box Container -->
+    <div id="globalMessageContainer" class="fixed top-4 right-4 z-50 w-full max-w-sm"></div>
+
+    <!-- Main Application Container -->
+    <div id="app" class="max-w-7xl mx-auto">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-neon-green mb-2">💰 North Star Finance Dashboard</h1>
+            <p class="text-gray-600">Your consolidated, private financial overview.</p>
+            <div id="loadingIndicator" class="hidden mt-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-neon-green mx-auto"></div>
+                <p class="text-sm text-neon-green mt-2">Processing...</p>
+            </div>
+        </header>
+
+        <!-- Tabs/Navigation (Responsive) -->
+        <div class="flex border-b border-gray-200 mb-8 overflow-x-auto whitespace-nowrap">
+            <!-- Dashboard Tab (Active by Default) -->
+            <button onclick="showSection('dashboard')" id="tab-dashboard" class="py-2 px-4 text-sm font-medium border-b-2 border-neon-green focus:outline-none transition duration-150 text-neon-green font-semibold">Dashboard</button>
+            <!-- Accounts Tab (Inactive by Default) -->
+            <button onclick="showSection('accounts')" id="tab-accounts" class="py-2 px-4 text-sm font-medium border-b-2 border-transparent hover:border-neon-green focus:outline-none transition duration-150 text-gray-600 hover:text-gray-800">Accounts & People</button>
+            <button onclick="showSection('upload')" id="tab-upload" class="py-2 px-4 text-sm font-medium border-b-2 border-transparent hover:border-neon-green focus:outline-none transition duration-150 text-gray-600 hover:text-gray-800">Upload Transactions</button>
+            <button onclick="showSection('history')" id="tab-history" class="py-2 px-4 text-sm font-medium border-b-2 border-transparent hover:border-neon-green focus:outline-none transition duration-150 text-gray-600 hover:text-gray-800">History</button>
+        </div>
+
+        <!-- Dashboard Section (Active by Default) -->
+        <section id="dashboard" class="app-section">
+            <!-- Responsive Grid: 1 column on mobile, 3 columns on desktop -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200">
+                    <p class="text-sm text-gray-500">Total Net Worth</p>
+                    <h2 id="netWorthDisplay" class="text-3xl font-bold mt-1 text-neon-green">$0.00</h2>
+                </div>
+                <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200">
+                    <p class="text-sm text-gray-500">Total Accounts</p>
+                    <h2 id="totalAccountsDisplay" class="text-3xl font-bold mt-1 text-gray-800">0</h2>
+                </div>
+                <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200">
+                    <p class="text-sm text-gray-500">Total Transactions</p>
+                    <h2 id="totalTransactionsDisplay" class="text-3xl font-bold mt-1 text-gray-800">0</h2>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-semibold mb-4 text-gray-800">Account Summary </h3>
+            <div id="dashboardAccountList" class="space-y-4">
+                <p class="text-gray-500">No accounts added yet.</p>
+            </div>
+        </section>
+
+        <!-- Accounts Section (Hidden by Default) -->
+        <section id="accounts" class="app-section hidden">
+            <h3 class="text-2xl font-semibold mb-6 text-gray-800">Manage Accounts & Family</h3>
+
+            <!-- Person Management Form -->
+            <div class="bg-card p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
+                <h4 class="text-xl font-medium mb-4 text-neon-green">Manage Family Members</h4>
+                <form id="addPersonForm" class="flex flex-col md:flex-row gap-4 mb-6">
+                    <input type="text" id="personName" placeholder="New Member Name (e.g., Jane)" required class="input-field-styled flex-grow">
+                    <button type="submit" class="btn-primary">Add Member</button>
+                </form>
+
+                <div id="personList" class="space-y-2 text-sm">
+                    <!-- Persons listed here -->
+                </div>
+            </div>
+
+            <!-- Add Account Form -->
+            <div class="bg-card p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
+                <h4 class="text-xl font-medium mb-4 text-neon-green">Add New Account</h4>
+                <!-- Responsive Grid: 1 column on mobile, 4 columns on desktop -->
+                <form id="addAccountForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input type="text" id="accountName" placeholder="Account Nickname (e.g., TD Checking)" required class="input-field-styled col-span-full md:col-span-2">
+                    <input type="text" id="accountCode" placeholder="Code (e.g., TDCH)" required pattern="[A-Za-z0-9]{4}" title="4 characters only, used for CSV matching (e.g., BankCode + TypeCode)" maxlength="4" class="input-field-styled">
+
+                    <select id="accountType" required class="input-field-styled">
+                        <option value="" disabled selected>Select Type</option>
+                        <option value="Checking">Checking</option>
+                        <option value="Savings">Savings</option>
+                        <option value="Credit">Credit Card</option>
+                        <option value="RRSP">RRSP (Inv)</option>
+                        <option value="TFSA">TFSA (Inv)</option>
+                        <option value="HFSA">FHSA (Inv)</option>
+                        <option value="RESP">RESP (Inv)</option>
+                    </select>
+                    <select id="accountPerson" required class="input-field-styled">
+                        <!-- Options filled by JS -->
+                    </select>
+                    <input type="number" id="accountBalance" placeholder="Initial Balance (CAD)" required step="0.01" class="input-field-styled">
+                    <button type="submit" class="btn-primary md:col-span-1">Add Account</button>
+                </form>
+            </div>
+
+            <!-- Account List -->
+            <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200">
+                <h4 class="text-xl font-medium mb-4">Your Accounts (<span id="accountCount">0</span>)</h4>
+                <div id="accountList" class="space-y-3">
+                    <p class="text-gray-500">Your accounts will appear here.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upload Section -->
+        <section id="upload" class="app-section hidden">
+            <h3 class="text-2xl font-semibold mb-6 text-gray-800">Transaction Data Upload</h3>
+
+            <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200">
+                <h4 class="text-xl font-medium mb-4 text-neon-green">Import TD-Style CSV File</h4>
+                <p class="text-sm text-gray-600 mb-4">
+                    The parser is configured for the **TD Bank 5-column format**: `Date,Description,Expense,Income,Balance`.
+                    <br>The filename **must** follow the convention: **`BANK_PERSON_TYPE_MM_YY.csv`**
+                    <br>Example: `TD_ME_CH_10_25.csv` (TD Bank, Person ME, Checking Account, Oct 2025)
+                    <br>The file contents are matched against the 4-character **Code** (e.g., TDCH) and the **Person's two-letter code** (e.g., ME) defined in your accounts list.
+                </p>
+
+                <form id="uploadForm">
+                    <label for="csvFile" class="block mb-2 text-sm font-medium text-gray-700">Choose CSV File</label>
+                    <!-- Input file styling adjusted for light theme -->
+                    <input type="file" id="csvFile" accept=".csv" required class="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-neon-green hover:file:bg-gray-300 transition duration-150">
+                    <button type="submit" class="btn-primary mt-6">Process & Upload Transactions</button>
+                </form>
+
+                <div id="uploadMessage" class="mt-4 text-sm"></div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="history" class="app-section hidden">
+            <h3 class="text-2xl font-semibold mb-6 text-gray-800">Transaction History</h3>
+
+            <!-- Responsive Filtering Layout -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+                <select id="historyFilterAccount" class="input-field-styled w-full md:w-1/3">
+                    <option value="all">All Accounts</option>
+                    <!-- Options filled by JS -->
+                </select>
+                <input type="text" id="historyFilterSearch" placeholder="Filter by Description" class="input-field-styled w-full md:w-1/3">
+            </div>
+
+            <!-- Table Container with Mobile Horizontal Scrolling -->
+            <div class="bg-card p-6 rounded-xl shadow-lg border border-gray-200 overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionHistoryBody" class="divide-y divide-gray-100">
+                        <!-- Transactions injected here -->
+                    </tbody>
+                </table>
+                <p id="noTransactionsMessage" class="text-center text-gray-500 py-4 hidden">No transactions recorded yet.</p>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Global Alert/Message Box Component (Custom implementation to avoid alert()) -->
+    <script>
+        /** Shows a floating, dismissible message (replaces alert/confirm for non-critical messages). */
+        const showMessage = (text, type = 'success', duration = 5000) => {
+            const container = document.getElementById('globalMessageContainer');
+            const colorMap = {
+                'success': 'bg-green-600 border-green-400',
+                'error': 'bg-red-600 border-red-400',
+                'info': 'bg-blue-600 border-blue-400'
+            };
+            
+            const message = document.createElement('div');
+            // Using dark theme colors for the notification box itself to ensure contrast
+            message.className = `p-4 mb-2 rounded-lg shadow-xl text-white text-sm border-l-4 ${colorMap[type]} transition-opacity duration-300`;
+            message.textContent = text;
+            
+            container.prepend(message); // Prepend so new messages appear at the top
+
+            setTimeout(() => {
+                message.classList.add('opacity-0');
+                setTimeout(() => message.remove(), 300);
+            }, duration);
+        };
+    </script>
+
+
+    <script>
+        const STORAGE_KEY = 'financeTrackerData';
+        // Account type mapping for calculating net worth (Liability vs Asset)
+        const ACCT_TYPES = {
+            Checking: 'Cash', Savings: 'Cash', Credit: 'Liability',
+            RRSP: 'Investment', TFSA: 'Investment', HFSA: 'Investment', RESP: 'Investment'
+        };
+
+        let data = {
+            accounts: [],
+            persons: ['Me'], // Start with "Me"
+            transactions: []
+        };
+
+        // --- Utility Functions ---
+
+        /** Loads data from localStorage or initializes default structure. */
+        const loadData = () => {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    data = JSON.parse(stored);
+                    // Ensure core arrays exist
+                    if (!Array.isArray(data.transactions)) { data.transactions = []; }
+                    if (!Array.isArray(data.persons)) { data.persons = ['Me']; }
+                    if (!data.persons.includes('Me')) { data.persons.unshift('Me'); }
+
+                    // Ensure accounts have a unique ID and code (migration safety)
+                    data.accounts = data.accounts.map(account => ({
+                        ...account,
+                        id: account.id || generateId(),
+                        // Ensure code exists for older entries
+                        code: account.code || (account.name.substring(0, 2) + account.type.substring(0, 2)).toUpperCase()
+                    }));
+                }
+            } catch (e) {
+                console.error("Could not load data from localStorage:", e);
+                data = { accounts: [], persons: ['Me'], transactions: [] };
+                showMessage("Error loading data. Using default structure.", 'error');
+            }
+        };
+
+        /** Saves the current data object to localStorage. */
+        const saveData = () => {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (e) {
+                console.error("Could not save data to localStorage:", e);
+                showMessage('Error: Failed to save data. Storage might be full or blocked.', 'error');
+            }
+        };
+
+        /** Generates a simple unique ID. */
+        const generateId = () => 'ac' + (Math.random().toString(36).substring(2, 9));
+
+        /** Formats number as currency. */
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('en-CA', {
+                style: 'currency',
+                currency: 'CAD'
+            }).format(amount);
+        };
+
+        // --- Person & Account Management ---
+
+        const renderPeopleAndAccounts = () => {
+            // Containers
+            const listContainer = document.getElementById('accountList');
+            const dashboardContainer = document.getElementById('dashboardAccountList');
+            const historyFilter = document.getElementById('historyFilterAccount');
+            const personSelect = document.getElementById('accountPerson');
+            const accountCountSpan = document.getElementById('accountCount');
+            const personListContainer = document.getElementById('personList'); 
+
+            // Clear containers
+            listContainer.innerHTML = '';
+            dashboardContainer.innerHTML = '';
+            historyFilter.innerHTML = '<option value="all">All Accounts</option>';
+            personSelect.innerHTML = '<option value="" disabled selected>Select Owner</option>';
+
+            accountCountSpan.textContent = data.accounts.length;
+            document.getElementById('totalAccountsDisplay').textContent = data.accounts.length;
+
+            if (data.accounts.length === 0) {
+                listContainer.innerHTML = '<p class="text-gray-500">Your accounts will appear here.</p>';
+                dashboardContainer.innerHTML = '<p class="text-gray-500">No accounts added yet.</p>';
+            }
+
+            // 1. Populate Persons Dropdown and List
+            personListContainer.innerHTML = '';
+            data.persons.forEach(person => {
+                personSelect.innerHTML += `<option value="${person}">${person}</option>`;
+
+                const isDeletable = person !== 'Me';
+                personListContainer.innerHTML += `
+                    <div class="flex justify-between items-center bg-gray-100 p-3 rounded-lg border border-gray-200">
+                        <span class="text-gray-800">${person}</span>
+                        ${isDeletable ? `<button onclick="deletePerson('${person}')" class="text-red-500 hover:text-red-600 transition duration-150 p-1" title="Remove Member">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>` : `<span class="text-gray-400">Default</span>`}
+                    </div>
+                `;
+            });
+
+            // 2. Populate Accounts List
+            data.accounts.forEach(account => {
+                const isPositive = ACCT_TYPES[account.type] !== 'Liability';
+                const balanceDisplay = formatCurrency(account.balance);
+                // Updated balance colors for light theme
+                const balanceClass = isPositive ? 'text-green-600' : 'text-red-600';
+
+                // Account List (Management)
+                const listItem = `
+                    <div id="account-${account.id}" class="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 p-4 rounded-xl border border-gray-200 hover:bg-gray-200 transition duration-150">
+                        <div>
+                            <p class="text-lg font-semibold text-gray-800">${account.name} <span class="text-sm text-gray-500">(${account.code} - ${account.type} - ${account.person})</span></p>
+                            <p class="${balanceClass} text-sm mt-1">Balance: ${balanceDisplay}</p>
+                        </div>
+                        <button onclick="deleteAccount('${account.id}')" class="text-red-500 hover:text-red-600 p-2 rounded-full transition duration-150 mt-2 md:mt-0" title="Delete Account">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                `;
+                listContainer.innerHTML += listItem;
+
+                // Dashboard List
+                const dashboardItem = `
+                    <div class="flex justify-between items-center bg-gray-100 p-4 rounded-xl border border-gray-200">
+                        <div>
+                            <p class="font-medium text-gray-800">${account.name} <span class="text-xs text-gray-500">(${account.code} / ${account.type})</span></p>
+                            <p class="text-xs text-gray-600">Owner: ${account.person}</p>
+                        </div>
+                        <p class="text-lg font-bold ${balanceClass}">${balanceDisplay}</p>
+                    </div>
+                `;
+                dashboardContainer.innerHTML += dashboardItem;
+
+                // History Filter
+                historyFilter.innerHTML += `<option value="${account.id}">${account.name} (${account.code})</option>`;
+            });
+
+            // Calculate Net Worth
+            const netWorth = data.accounts.reduce((sum, account) => {
+                // Treat Credit accounts with positive balances as liabilities (negative net worth contribution)
+                const contribution = (account.type === 'Credit' && account.balance > 0) ? -account.balance : account.balance;
+                return sum + contribution;
+            }, 0);
+            document.getElementById('netWorthDisplay').textContent = formatCurrency(netWorth);
+        };
+
+        /** Replaced window.confirm with direct deletion for compliance */
+        const deletePerson = (name) => {
+            const accountsOwned = data.accounts.filter(acct => acct.person === name);
+            if (accountsOwned.length > 0) {
+                showMessage(`Cannot delete ${name}. They still own ${accountsOwned.length} account(s). Please reassign or delete their accounts first.`, 'error');
+                return;
+            }
+            data.persons = data.persons.filter(p => p !== name);
+            saveData();
+            renderPeopleAndAccounts();
+            showMessage(`${name} has been removed.`, 'info');
+        };
+
+        /** Replaced window.confirm with direct deletion for compliance */
+        const deleteAccount = (id) => {
+            data.accounts = data.accounts.filter(acct => acct.id !== id);
+            data.transactions = data.transactions.filter(t => t.accountId !== id); // Remove associated transactions
+            saveData();
+            renderAll();
+            showMessage("Account and associated transactions deleted.", 'info');
+        };
+
+        document.getElementById('addPersonForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('personName').value.trim();
+            if (name) {
+                addPerson(name);
+                document.getElementById('personName').value = '';
+            }
+        });
+
+        document.getElementById('addAccountForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('accountName').value.trim();
+            const code = document.getElementById('accountCode').value.trim().toUpperCase(); 
+            const type = document.getElementById('accountType').value;
+            const person = document.getElementById('accountPerson').value;
+            const balance = parseFloat(document.getElementById('accountBalance').value);
+
+            if (data.accounts.some(acct => acct.code === code)) {
+                showMessage(`Account code "${code}" is already in use. Please choose a unique 4-character code.`, 'error');
+                return;
+            }
+
+            const newAccount = {
+                id: generateId(),
+                code: code, 
+                name: name,
+                type: type,
+                person: person,
+                balance: balance,
+            };
+
+            data.accounts.push(newAccount);
+            saveData();
+            renderPeopleAndAccounts();
+            document.getElementById('addAccountForm').reset();
+            showMessage(`Account "${name} (${code})" added.`, 'success');
+        });
+
+        /** Updates account balance based on a new transaction. */
+        const updateAccountBalance = (accountId, amount) => {
+            const account = data.accounts.find(acct => acct.id === accountId);
+            if (account) {
+                account.balance = parseFloat((account.balance + amount).toFixed(2));
+            }
+        };
+
+        /** Parses a transaction CSV file and processes the entries using TD 5-column format. */
+        const parseCSV = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+
+                // Naming convention: BANK_PERSON_TYPE_MM_YY.csv
+                // Groups: [Full Match, BankCode, PersonCode, TypeCode, Month, Year]
+                const filenameRegex = /^([a-z0-9]{2})_([a-z0-9]{2})_([a-z0-9]{2})_(\d{2})_(\d{2})\.csv$/i;
+                const filenameMatch = file.name.match(filenameRegex);
+
+                if (!filenameMatch) {
+                    console.error("Filename Mismatch Debug:", {
+                        fileName: file.name,
+                        expectedRegex: filenameRegex.toString(),
+                        expectedFormat: 'BANK_PERSON_TYPE_MM_YY.csv (e.g., TD_ME_CH_10_25.csv)'
+                    });
+                    return reject(`Filename must match the strict format: BANK_PERSON_TYPE_MM_YY.csv. Received: ${file.name}`);
+                }
+
+                const [, bankCode, personCode, typeCode] = filenameMatch;
+                const combinedAccountCode = (bankCode + typeCode).toUpperCase(); // e.g., TDCH
+
+                // 1. Find the target account using the combined code
+                let targetAccount = data.accounts.find(acct => acct.code === combinedAccountCode);
+
+                if (!targetAccount) {
+                    console.error("Account Code Mismatch Debug:", {
+                        fileName: file.name,
+                        combinedCodeFound: combinedAccountCode,
+                        availableCodes: data.accounts.map(a => a.code)
+                    });
+                    return reject(`No account found matching code: "${combinedAccountCode}". Please check the 4-character Code in your account list.`);
+                }
+
+                // 2. Validate person code (using first two letters of stored person name)
+                const expectedPersonCode = targetAccount.person.substring(0, 2).toUpperCase();
+                if (expectedPersonCode !== personCode.toUpperCase()) {
+                    console.error("Person Code Mismatch Debug:", {
+                        fileName: file.name,
+                        accountName: targetAccount.name,
+                        personFoundInFileName: personCode,
+                        expectedPersonCode: expectedPersonCode
+                    });
+                    return reject(`Account "${targetAccount.name}" belongs to ${targetAccount.person}. Expected person code in filename: ${expectedPersonCode}, found: ${personCode}.`);
+                }
+
+
+                reader.onload = (e) => {
+                    const csv = e.target.result;
+                    // Simple CSV parsing assuming TD's quote behavior and comma separation
+                    const lines = csv.split('\n').filter(line => line.trim() !== '');
+
+                    if (lines.length <= 1) {
+                        return reject("CSV file is empty or only contains headers.");
+                    }
+
+                    // Skipping header line
+                    const newTransactions = [];
+                    let processedCount = 0;
+                    let balanceUpdate = 0;
+
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i];
+                        const values = line.replace(/"/g, '').split(',');
+
+                        // Expecting 5 columns: Date, Description, Expense, Income, Balance
+                        if (values.length < 5) continue;
+
+                        const date = values[0].trim();
+                        const description = values[1].trim();
+                        const expenseStr = values[2].trim();
+                        const incomeStr = values[3].trim();
+
+                        let amount = 0;
+                        let type = '';
+
+                        if (expenseStr) {
+                            amount = -parseFloat(expenseStr); // Expense is negative (DEBIT)
+                            type = 'DEBIT';
+                        } else if (incomeStr) {
+                            amount = parseFloat(incomeStr); // Income is positive (CREDIT)
+                            type = 'CREDIT';
+                        }
+
+                        if (isNaN(amount) || amount === 0) continue;
+
+                        // Create transaction object
+                        const transaction = {
+                            id: generateId() + (i-1),
+                            accountId: targetAccount.id,
+                            date: new Date(date).toISOString().split('T')[0], // YYYY-MM-DD
+                            description: description,
+                            amount: amount,
+                            accountName: targetAccount.name,
+                            person: targetAccount.person,
+                            type: type,
+                            sourceFile: file.name
+                        };
+
+                        // Check for duplicates before adding
+                        const isDuplicate = data.transactions.some(t =>
+                            t.accountId === transaction.accountId &&
+                            t.date === transaction.date &&
+                            t.description === transaction.description &&
+                            t.amount === transaction.amount
+                        );
+
+                        if (!isDuplicate) {
+                            newTransactions.push(transaction);
+                            balanceUpdate += amount;
+                            processedCount++;
+                        }
+                    }
+
+                    resolve({ newTransactions, targetAccount, balanceUpdate, processedCount });
+                };
+
+                reader.onerror = () => reject('Error reading file.');
+                reader.readAsText(file);
+            });
+        };
+
+        /** Handles the submission of the file upload form. */
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            const uploadMessage = document.getElementById('uploadMessage');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+
+            if (!file) {
+                showMessage('Please select a CSV file to upload.', 'error');
+                return;
+            }
+            
+            uploadMessage.textContent = '';
+            loadingIndicator.classList.remove('hidden');
+
+            try {
+                const { newTransactions, targetAccount, balanceUpdate, processedCount } = await parseCSV(file);
+
+                if (newTransactions.length === 0) {
+                    showMessage('No new or unique transactions found in file.', 'info');
+                    uploadMessage.textContent = `File processed, but 0 new transactions added (likely duplicates).`;
+                    return;
+                }
+
+                // 1. Add new transactions
+                data.transactions.push(...newTransactions);
+
+                // 2. Update account balance (using the current balance in the data array)
+                updateAccountBalance(targetAccount.id, balanceUpdate);
+
+                // 3. Save and re-render everything
+                saveData();
+                renderAll();
+                
+                showMessage(`Successfully imported ${processedCount} new transactions for ${targetAccount.name}.`, 'success');
+                uploadMessage.textContent = `Successfully added ${processedCount} transactions for ${targetAccount.name}. Balance updated by ${formatCurrency(balanceUpdate)}.`;
+                
+                // Switch to history tab to view new transactions
+                showSection('history');
+
+            } catch (error) {
+                console.error('Upload Error:', error);
+                showMessage(error.toString(), 'error', 10000);
+                uploadMessage.textContent = `Upload failed: ${error.toString()}`;
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        });
+
+
+        /** Renders the list of transactions in the History tab, applying filters. */
+        const renderTransactionHistory = () => {
+            const tbody = document.getElementById('transactionHistoryBody');
+            const filterAccount = document.getElementById('historyFilterAccount').value;
+            const filterSearch = document.getElementById('historyFilterSearch').value.toLowerCase();
+            const noTransactionsMessage = document.getElementById('noTransactionsMessage');
+
+            // 1. Filter Transactions
+            let filteredTransactions = data.transactions;
+
+            if (filterAccount !== 'all') {
+                filteredTransactions = filteredTransactions.filter(t => t.accountId === filterAccount);
+            }
+            if (filterSearch) {
+                filteredTransactions = filteredTransactions.filter(t => t.description.toLowerCase().includes(filterSearch));
+            }
+
+            // 2. Sort by date (most recent first)
+            filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // 3. Render
+            tbody.innerHTML = '';
+            document.getElementById('totalTransactionsDisplay').textContent = data.transactions.length;
+
+            if (filteredTransactions.length === 0) {
+                noTransactionsMessage.classList.remove('hidden');
+                return;
+            } else {
+                noTransactionsMessage.classList.add('hidden');
+            }
+
+            filteredTransactions.forEach(t => {
+                const amountClass = t.amount < 0 ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold';
+                const accountCode = data.accounts.find(a => a.id === t.accountId)?.code || 'N/A';
+                
+                const row = `
+                    <tr class="hover:bg-gray-50 text-sm">
+                        <td class="px-6 py-3 whitespace-nowrap text-gray-500">${t.date}</td>
+                        <td class="px-6 py-3 whitespace-normal text-gray-800">${t.description}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-gray-500">${accountCode} (${t.person})</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-right ${amountClass}">${formatCurrency(t.amount)}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        };
+
+        // Add event listeners for history filtering
+        document.getElementById('historyFilterAccount').addEventListener('change', renderTransactionHistory);
+        document.getElementById('historyFilterSearch').addEventListener('input', renderTransactionHistory);
+
+
+        /** Full render function to refresh all dynamic parts of the UI. */
+        const renderAll = () => {
+            renderPeopleAndAccounts();
+            renderTransactionHistory();
+        };
+
+
+        // --- Tab Switching Logic ---
+
+        /** Switches the active section and updates tab styling. */
+        const showSection = (sectionId) => {
+            // Hide all sections
+            document.querySelectorAll('.app-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Deactivate all tabs
+            document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+                tab.classList.remove('border-neon-green', 'text-neon-green', 'font-semibold');
+                tab.classList.add('border-transparent', 'text-gray-600', 'hover:border-neon-green', 'hover:text-gray-800');
+            });
+
+            // Show target section
+            document.getElementById(sectionId).classList.remove('hidden');
+
+            // Activate target tab
+            const activeTab = document.getElementById(`tab-${sectionId}`);
+            if (activeTab) {
+                activeTab.classList.remove('border-transparent', 'text-gray-600', 'hover:border-neon-green', 'hover:text-gray-800');
+                activeTab.classList.add('border-neon-green', 'text-neon-green', 'font-semibold');
+            }
+        };
+
+
+        // --- Initialization ---
+
+        window.onload = () => {
+            loadData();
+            renderAll();
+            // Ensure the correct tab is visible on load
+            showSection('dashboard');
+        };
+    </script>
+
+
 </body>
 </html>
