@@ -470,7 +470,13 @@
                 const filenameMatch = file.name.match(filenameRegex);
 
                 if (!filenameMatch) {
-                    return reject("Filename must be in the format: BANK_PERSON_TYPE_MM_YY.csv (e.g., TD_ME_CH_10_25.csv).");
+                    const expectedFormat = 'BANK_PERSON_TYPE_MM_YY.csv (e.g., TD_ME_CH_10_25.csv)';
+                    console.error("Filename Mismatch Debug:", {
+                        fileName: file.name,
+                        expectedRegex: filenameRegex.toString(),
+                        expectedFormat: expectedFormat
+                    });
+                    return reject(`Filename must match the strict format: ${expectedFormat}. Received: ${file.name}`);
                 }
 
                 const [, bankCode, personCode, typeCode] = filenameMatch;
@@ -480,13 +486,24 @@
                 let targetAccount = data.accounts.find(acct => acct.code === combinedAccountCode);
 
                 if (!targetAccount) {
-                    return reject(`No account found matching code: "${combinedAccountCode}". Please check your account list.`);
+                    console.error("Account Code Mismatch Debug:", {
+                        fileName: file.name,
+                        combinedCodeFound: combinedAccountCode,
+                        availableCodes: data.accounts.map(a => a.code)
+                    });
+                    return reject(`No account found matching code: "${combinedAccountCode}". Please check the 4-character Code in your account list.`);
                 }
 
                 // 2. Validate person code (using first two letters of stored person name)
                 const expectedPersonCode = targetAccount.person.substring(0, 2).toUpperCase();
                 if (expectedPersonCode !== personCode.toUpperCase()) {
-                    return reject(`Account "${targetAccount.name}" belongs to ${targetAccount.person}. Expected person code: ${expectedPersonCode}, found: ${personCode}.`);
+                    console.error("Person Code Mismatch Debug:", {
+                        fileName: file.name,
+                        accountName: targetAccount.name,
+                        personFoundInFileName: personCode,
+                        expectedPersonCode: expectedPersonCode
+                    });
+                    return reject(`Account "${targetAccount.name}" belongs to ${targetAccount.person}. Expected person code in filename: ${expectedPersonCode}, found: ${personCode}.`);
                 }
 
 
@@ -592,6 +609,7 @@
                 fileInput.value = '';
 
             } catch (error) {
+                // The error message now contains the specific reason for failure
                 console.error("Upload Error:", error);
                 showMessage(`Upload failed: ${error}`, 'error', 7000);
             } finally {
